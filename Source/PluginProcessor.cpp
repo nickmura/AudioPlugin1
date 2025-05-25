@@ -144,6 +144,56 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
+    auto newDSPOrder = DSP_Order();
+    
+    //pull new dsp order
+    while (dspOrderFifo.pull(newDSPOrder) )
+    {
+        
+    }
+    
+    //if you pulled ,replace dspOrder
+    if (newDSPOrder != DSP_Order() )
+        dspOrder = newDSPOrder;
+
+    
+    DSP_Pointers dspPointers;
+    
+    for(size_t i = 0; i < dspPointers.size(); ++i)
+    {
+         switch (dspOrder[i])
+         {
+            case DSP_Option::Phase:
+                 dspPointers[i] = &phaser;
+                 break;
+            case DSP_Option::Chorus:
+                 dspPointers[i] = &chorus;
+                 break;
+            case DSP_Option::Overdrive:
+                 dspPointers[i] = &overdrive;
+                 break;
+            case DSP_Option::LadderFilter:
+                 dspPointers[i] = &ladderFilter;
+                 break;
+            case DSP_Option::END_OF_LIST:
+                 jassertfalse;
+                 break;
+        }
+    }
+    
+    //process:dfdsfdsfdsfsdf
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+    
+    for (size_t i = 0; i < dspPointers.size(); ++i)
+    {
+        if(dspPointers[i] != nullptr )
+        {
+            dspPointers[i]->process(context);
+        }
+    }
+    
+    
 
 }
 
