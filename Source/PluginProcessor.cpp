@@ -175,7 +175,16 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
             case DSP_Option::END_OF_LIST:
                 jassertfalse;
                 break;
-            }
+        }
+    }
+    
+    auto block = juce::dsp::AudioBlock<float>(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);
+    
+    for (size_t i = 0; i < dspPointers.size(); i++) {
+        if (dspPointers[i] != nullptr) {
+            dspPointers[i]->process(context);
+        }
     }
 }
 
