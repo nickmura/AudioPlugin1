@@ -145,6 +145,15 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    auto newDSPOrder = DSP_Order();
+    
+    while ( dspOrderFifo.pull(newDSPOrder)) {
+        
+    }
+    
+    //if you pulled, replaced dspOrder
+    if (newDSPOrder != DSP_Order())
+        dspOrder = newDSPOrder;
 }
 
 //==============================================================================
