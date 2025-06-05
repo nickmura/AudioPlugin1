@@ -9,6 +9,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+auto getPhaserRateName() { return juce::String("Phaser RateHz"); }
+auto getPhaserCenterFreqName() { return juce::String("Phaser Center FreqHz"); }
+auto getPhaserDepthName() { return juce::String("Phaser Depth %"); }
+auto getPhaserFeedbackName() { return juce::String("Phaser Feedback %"); }
+auto getPhaserMixName() { return juce::String("Phaser Mix %"); }
 //==============================================================================
 AudioPlugin1AudioProcessor::AudioPlugin1AudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -133,6 +138,10 @@ bool AudioPlugin1AudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 
 juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    //TODO: layout.add( paramaterID )
+    
+    
+    
     
     return layout;
 }
@@ -153,7 +162,7 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         buffer.clear (i, 0, buffer.getNumSamples());
 
     
-    //TODO: add APVTS (AudioProcessorValueTreeState)
+    //[DONE]: add APVTS (AudioProcessorValueTreeState)
     //TODO: create audio paramters for all dsp choices
     //TODO: update DSP (digital signal processing) here from audio parameters
     //TODO: save/load settings
