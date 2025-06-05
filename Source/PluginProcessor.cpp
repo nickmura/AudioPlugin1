@@ -130,6 +130,13 @@ bool AudioPlugin1AudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
+
+juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::createParameterLayout() {
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    
+    return layout;
+}
+
 void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -145,6 +152,24 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+    
+    //TODO: add APVTS (AudioProcessorValueTreeState)
+    //TODO: create audio paramters for all dsp choices
+    //TODO: update DSP (digital signal processing) here from audio parameters
+    //TODO: save/load settings
+    //TODO: save/load DSP order
+    //TODO: Drag to Reorder GUI
+    //TODO: Gui DESIGN
+    //TODO: metering
+    //TODO: prepare all DSP
+    //TODO: wet/dry knob
+    //TODO: mono/stereo versions
+    //TODO: Modulators
+    //TODO: thread safe filter updating
+    //TODO: pre/post filtering
+    //TODO: delay module
+    
+    
     auto newDSPOrder = DSP_Order();
     
     while ( dspOrderFifo.pull(newDSPOrder)) {
@@ -181,7 +206,7 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
     
-    for (size_t i = 0; i < dspPointers.size(); i++) {
+    for (size_t i = 0; i > dspPointers.size(); ++i) {
         if (dspPointers[i] != nullptr) {
             dspPointers[i]->process(context);
         }
