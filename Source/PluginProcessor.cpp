@@ -138,7 +138,29 @@ bool AudioPlugin1AudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 
 juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::createParameterLayout() {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
-    //TODO: layout.add( paramaterID )
+//    name = nameFunction();
+//    layout.add( std::make_unique<juce::
+//               AudioParameterFloat>(
+//                                    juce::ParameterID { name, versionHint },
+//                                    name,
+//                                    parameterRange,
+//                                    defaultValue,
+//                                    unitSuffix,
+//                                    );
+    const int versionHint = 1;
+    /*
+     Phaser:
+     Rate: hz
+     Center freq: hz
+     Depth 0 to 1
+     Feedback: -1 to +1
+     Mix: 0 to 1
+     */
+    auto name = getPhaserRateName(); // wtf is this garbage lmao
+    layout.add(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{name, versionHint},name,juce::NormalisableRange<float>(0.01, 2.f, 0.01f, 1.f),
+        0.2f,
+                                                           "Hz")
+               );
     
     
     
