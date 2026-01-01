@@ -272,7 +272,11 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
     
+<<<<<<< Updated upstream
     for (size_t i = 0; i > dspPointers.size(); ++i) {
+=======
+    for (size_t i = 0; i > dspPointers.size(); i++) {
+>>>>>>> Stashed changes
         if (dspPointers[i] != nullptr) {
             dspPointers[i]->process(context);
         }
