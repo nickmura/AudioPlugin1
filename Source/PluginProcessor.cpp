@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
 auto getPhaserRateName() { return juce::String("Phaser RateHz"); }
 auto getPhaserCenterFreqName() { return juce::String("Phaser Center FreqHz"); }
 auto getPhaserDepthName() { return juce::String("Phaser Depth %"); }
@@ -27,7 +28,29 @@ AudioPlugin1AudioProcessor::AudioPlugin1AudioProcessor()
                        )
 #endif
 {
-
+    auto phaserParams = std::array
+    {
+        &phaserRateHz,
+        &phaserCenterFreqHz,
+        &phaserDepthPercent,
+        &phaserFeedbackPercent,
+        &phaserMixPercent
+    };
+    
+    auto phaserFuncs = std::array
+    {
+        &getPhaserRateName,
+        &getPhaserCenterFreqName,
+        &getPhaserDepthName,
+        &getPhaserFeedbackName,
+        &getPhaserMixName
+    };
+    
+    for (size_t i = 0; i < phaserParams.size(); ++i) {
+        auto ptrToParamPtr = phaserParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(phaserFuncs[i]() ));
+        jassert( *ptrToParamPtr != nullptr);
+    }
 }
 
 AudioPlugin1AudioProcessor::~AudioPlugin1AudioProcessor()
@@ -101,6 +124,15 @@ void AudioPlugin1AudioProcessor::prepareToPlay (double sampleRate, int samplesPe
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    juce::dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = static_cast<juce::uint32>(samplesPerBlock);
+    spec.numChannels = static_cast<juce::uint32>(getTotalNumOutputChannels());
+
+    phaser.prepare(spec);
+    chorus.prepare(spec);
+    overdrive.prepare(spec);
+    ladderFilter.prepare(spec);
 }
 
 void AudioPlugin1AudioProcessor::releaseResources()
@@ -173,7 +205,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::
                                                            0.05f,
                                                            "%"));
     //phaser center freq: audio Hz
-    name = getPhaserDepthName();
+    name = getPhaserCenterFreqName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID{name, versionHint},
                                                            name,
@@ -246,7 +278,7 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     if (newDSPOrder != DSP_Order())
         dspOrder = newDSPOrder;
     
-    DSP_Pointers dspPointers;
+    DSP_Pointers dspPointers{};
     
     for (size_t i = 0; i < dspPointers.size(); ++i) {
         
@@ -272,11 +304,8 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto block = juce::dsp::AudioBlock<float>(buffer);
     auto context = juce::dsp::ProcessContextReplacing<float>(block);
     
-<<<<<<< Updated upstream
-    for (size_t i = 0; i > dspPointers.size(); ++i) {
-=======
-    for (size_t i = 0; i > dspPointers.size(); i++) {
->>>>>>> Stashed changes
+
+    for (size_t i = 0; i < dspPointers.size(); ++i) {
         if (dspPointers[i] != nullptr) {
             dspPointers[i]->process(context);
         }

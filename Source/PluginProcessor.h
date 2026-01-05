@@ -88,7 +88,7 @@ public:
     juce::AudioParameterFloat* phaserMixPercent = nullptr;
     
 private:
-    DSP_Order dspOrder;
+    DSP_Order dspOrder{};
     
     template<typename DSP>
     struct DSP_Choice : juce::dsp::ProcessorBase
