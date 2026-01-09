@@ -86,6 +86,46 @@ public:
     juce::AudioParameterFloat* phaserDepthPercent = nullptr;
     juce::AudioParameterFloat* phaserFeedbackPercent = nullptr;
     juce::AudioParameterFloat* phaserMixPercent = nullptr;
+
+    /*
+     Chorus:
+     Rate: hz
+     Depth: 0 to 1
+     Centre delay: ms
+     Feedback: 0 to 1
+     Mix: 0 to 1
+     */
+    
+    juce::AudioParameterFloat* chorusRateHz = nullptr;
+    juce::AudioParameterFloat* chorusDepthPercent = nullptr;
+    juce::AudioParameterFloat* chorusCentreDelayMs = nullptr;
+    juce::AudioParameterFloat* chorusFeedbackPercent = nullptr;
+    juce::AudioParameterFloat* chorusMixPercent = nullptr;
+    
+    /*
+     Overdrive:
+     Drive: 0 to 1
+     Pre gain: dB
+     Post gain: dB
+     Mix: 0 to 1
+     */
+    
+    juce::AudioParameterFloat* overdriveDrivePercent = nullptr;
+    juce::AudioParameterFloat* overdrivePreGainDb = nullptr;
+    juce::AudioParameterFloat* overdrivePostGainDb = nullptr;
+    juce::AudioParameterFloat* overdriveMixPercent = nullptr;
+    
+    /*
+     Ladder filter:
+     Cutoff: Hz
+     Resonance: 0 to 1
+     Drive: 0 to 1
+     Mode: LP/HP/BP
+     */
+    juce::AudioParameterFloat* ladderFilterCutoffHz = nullptr;
+    juce::AudioParameterFloat* ladderFilterResonancePercent = nullptr;
+    juce::AudioParameterFloat* ladderFilterDrivePercent = nullptr;
+    juce::AudioParameterChoice* ladderFilterMode = nullptr;
     
 private:
     DSP_Order dspOrder{};

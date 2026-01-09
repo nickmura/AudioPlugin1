@@ -15,6 +15,19 @@ auto getPhaserCenterFreqName() { return juce::String("Phaser Center FreqHz"); }
 auto getPhaserDepthName() { return juce::String("Phaser Depth %"); }
 auto getPhaserFeedbackName() { return juce::String("Phaser Feedback %"); }
 auto getPhaserMixName() { return juce::String("Phaser Mix %"); }
+auto getChorusRateName() { return juce::String("Chorus RateHz"); }
+auto getChorusDepthName() { return juce::String("Chorus Depth %"); }
+auto getChorusCentreDelayName() { return juce::String("Chorus Centre DelayMs"); }
+auto getChorusFeedbackName() { return juce::String("Chorus Feedback %"); }
+auto getChorusMixName() { return juce::String("Chorus Mix %"); }
+auto getOverdriveDriveName() { return juce::String("Overdrive Drive %"); }
+auto getOverdrivePreGainName() { return juce::String("Overdrive PreGain dB"); }
+auto getOverdrivePostGainName() { return juce::String("Overdrive PostGain dB"); }
+auto getOverdriveMixName() { return juce::String("Overdrive Mix %"); }
+auto getLadderFilterCutoffName() { return juce::String("Ladder Cutoff Hz"); }
+auto getLadderFilterResonanceName() { return juce::String("Ladder Resonance %"); }
+auto getLadderFilterDriveName() { return juce::String("Ladder Drive %"); }
+auto getLadderFilterModeName() { return juce::String("Ladder Mode"); }
 //==============================================================================
 AudioPlugin1AudioProcessor::AudioPlugin1AudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -45,12 +58,81 @@ AudioPlugin1AudioProcessor::AudioPlugin1AudioProcessor()
         &getPhaserFeedbackName,
         &getPhaserMixName
     };
+
+    auto chorusParams = std::array
+    {
+        &chorusRateHz,
+        &chorusDepthPercent,
+        &chorusCentreDelayMs,
+        &chorusFeedbackPercent,
+        &chorusMixPercent
+    };
+
+    auto chorusFuncs = std::array
+    {
+        &getChorusRateName,
+        &getChorusDepthName,
+        &getChorusCentreDelayName,
+        &getChorusFeedbackName,
+        &getChorusMixName
+    };
+
+    auto overdriveParams = std::array
+    {
+        &overdriveDrivePercent,
+        &overdrivePreGainDb,
+        &overdrivePostGainDb,
+        &overdriveMixPercent
+    };
+
+    auto overdriveFuncs = std::array
+    {
+        &getOverdriveDriveName,
+        &getOverdrivePreGainName,
+        &getOverdrivePostGainName,
+        &getOverdriveMixName
+    };
+
+    auto ladderParams = std::array
+    {
+        &ladderFilterCutoffHz,
+        &ladderFilterResonancePercent,
+        &ladderFilterDrivePercent
+    };
+
+    auto ladderFuncs = std::array
+    {
+        &getLadderFilterCutoffName,
+        &getLadderFilterResonanceName,
+        &getLadderFilterDriveName
+    };
     
     for (size_t i = 0; i < phaserParams.size(); ++i) {
         auto ptrToParamPtr = phaserParams[i];
         *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(phaserFuncs[i]() ));
         jassert( *ptrToParamPtr != nullptr);
     }
+
+    for (size_t i = 0; i < chorusParams.size(); ++i) {
+        auto ptrToParamPtr = chorusParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(chorusFuncs[i]() ));
+        jassert( *ptrToParamPtr != nullptr);
+    }
+
+    for (size_t i = 0; i < overdriveParams.size(); ++i) {
+        auto ptrToParamPtr = overdriveParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(overdriveFuncs[i]() ));
+        jassert( *ptrToParamPtr != nullptr);
+    }
+
+    for (size_t i = 0; i < ladderParams.size(); ++i) {
+        auto ptrToParamPtr = ladderParams[i];
+        *ptrToParamPtr = dynamic_cast<juce::AudioParameterFloat*>(apvts.getParameter(ladderFuncs[i]() ));
+        jassert( *ptrToParamPtr != nullptr);
+    }
+
+    ladderFilterMode = dynamic_cast<juce::AudioParameterChoice*>(apvts.getParameter(getLadderFilterModeName()));
+    jassert(ladderFilterMode != nullptr);
 }
 
 AudioPlugin1AudioProcessor::~AudioPlugin1AudioProcessor()
@@ -228,6 +310,121 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::
                                                            juce::NormalisableRange<float>(0.01f, 1.f, 0.01f, 1.f),
                                                            0.05f,
                                                            "%"));
+
+    /*
+     Chorus:
+     Rate: hz
+     Depth: 0 to 1
+     Centre delay: ms
+     Feedback: 0 to 1
+     Mix: 0 to 1
+     */
+    name = getChorusRateName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.05f, 5.f, 0.01f, 1.f),
+                                                           0.3f,
+                                                           "Hz"));
+    name = getChorusDepthName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
+                                                           0.2f,
+                                                           "%"));
+    name = getChorusCentreDelayName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(1.f, 50.f, 0.1f, 1.f),
+                                                           7.f,
+                                                           "ms"));
+    name = getChorusFeedbackName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 0.95f, 0.01f, 1.f),
+                                                           0.1f,
+                                                           "%"));
+    name = getChorusMixName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
+                                                           0.2f,
+                                                           "%"));
+
+    /*
+     Overdrive:
+     Drive: 0 to 1
+     Pre gain: dB
+     Post gain: dB
+     Mix: 0 to 1
+     */
+    name = getOverdriveDriveName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
+                                                           0.5f,
+                                                           "%"));
+    name = getOverdrivePreGainName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f),
+                                                           0.f,
+                                                           "dB"));
+    name = getOverdrivePostGainName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(-24.f, 24.f, 0.1f, 1.f),
+                                                           0.f,
+                                                           "dB"));
+    name = getOverdriveMixName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
+                                                           1.0f,
+                                                           "%"));
+
+    /*
+     Ladder filter:
+     Cutoff: Hz
+     Resonance: 0 to 1
+     Drive: 0 to 1
+     Mode: LP/HP/BP
+     */
+    name = getLadderFilterCutoffName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f),
+                                                           1000.f,
+                                                           "Hz"));
+    name = getLadderFilterResonanceName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.01f, 1.f, 0.01f, 1.f),
+                                                           0.1f,
+                                                           "%"));
+    name = getLadderFilterDriveName();
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+                                                           juce::ParameterID{name, versionHint},
+                                                           name,
+                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
+                                                           0.0f,
+                                                           "%"));
+    name = getLadderFilterModeName();
+    layout.add(std::make_unique<juce::AudioParameterChoice>(
+                                                            juce::ParameterID{name, versionHint},
+                                                            name,
+                                                            juce::StringArray { "LP", "HP", "BP" },
+                                                            0));
     
     
     
