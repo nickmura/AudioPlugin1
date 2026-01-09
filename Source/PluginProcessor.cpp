@@ -464,6 +464,38 @@ void AudioPlugin1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     //TODO: pre/post filtering
     //TODO: delay module
     
+    phaser.dsp.setRate(phaserRateHz->get());
+    phaser.dsp.setDepth(phaserDepthPercent->get());
+    phaser.dsp.setCentreFrequency(phaserCenterFreqHz->get());
+    phaser.dsp.setFeedback(phaserFeedbackPercent->get());
+    phaser.dsp.setMix(phaserMixPercent->get());
+
+    chorus.dsp.setRate(chorusRateHz->get());
+    chorus.dsp.setDepth(chorusDepthPercent->get());
+    chorus.dsp.setCentreDelay(chorusCentreDelayMs->get());
+    chorus.dsp.setFeedback(chorusFeedbackPercent->get());
+    chorus.dsp.setMix(chorusMixPercent->get());
+
+    overdrive.dsp.setDrive(overdriveDrivePercent->get());
+
+    ladderFilter.dsp.setCutoffFrequencyHz(ladderFilterCutoffHz->get());
+    ladderFilter.dsp.setResonance(ladderFilterResonancePercent->get());
+    ladderFilter.dsp.setDrive(ladderFilterDrivePercent->get());
+    switch (ladderFilterMode->getIndex()) {
+        case 0:
+            ladderFilter.dsp.setMode(juce::dsp::LadderFilter<float>::Mode::LPF12);
+            break;
+        case 1:
+            ladderFilter.dsp.setMode(juce::dsp::LadderFilter<float>::Mode::HPF12);
+            break;
+        case 2:
+            ladderFilter.dsp.setMode(juce::dsp::LadderFilter<float>::Mode::BPF12);
+            break;
+        default:
+            ladderFilter.dsp.setMode(juce::dsp::LadderFilter<float>::Mode::LPF12);
+            break;
+    }
+
     
     auto newDSPOrder = DSP_Order();
     
