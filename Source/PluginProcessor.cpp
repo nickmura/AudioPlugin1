@@ -28,6 +28,21 @@ auto getLadderFilterCutoffName() { return juce::String("Ladder Cutoff Hz"); }
 auto getLadderFilterResonanceName() { return juce::String("Ladder Resonance %"); }
 auto getLadderFilterDriveName() { return juce::String("Ladder Drive %"); }
 auto getLadderFilterModeName() { return juce::String("Ladder Mode"); }
+auto getLadderFilterChoices(){
+    return juce::StringArray
+    {
+        "LPF12", // low-pass 12 dB/octave
+        "HPF12", // high-pass 12 dB/octave
+        "BPF12", // band-pass 12 dB/octave
+
+        "LPF24", // low-pass 24 dB/octave
+        "HPF24", // high pass 24 dB/octave
+        "BPF24", // band pass 24 dB/octave
+    };
+}
+
+auto getGeneralFilterModeName() { return juce::String("General Filter Mode"); }
+auto getGeneralFilterFreqName() { return juce::String("General Filter Mode"); } 
 //==============================================================================
 AudioPlugin1AudioProcessor::AudioPlugin1AudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -366,9 +381,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID{name, versionHint},
                                                            name,
-                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
-                                                           0.5f,
-                                                           "%"));
+                                                           juce::NormalisableRange<float>(1.0f, 10.f, 0.01f, 1.f),
+                                                           1.0f,
+                                                           "x"));
     name = getOverdrivePreGainName();
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID{name, versionHint},
@@ -416,9 +431,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::
     layout.add(std::make_unique<juce::AudioParameterFloat>(
                                                            juce::ParameterID{name, versionHint},
                                                            name,
-                                                           juce::NormalisableRange<float>(0.0f, 1.f, 0.01f, 1.f),
-                                                           0.0f,
-                                                           "%"));
+                                                           juce::NormalisableRange<float>(1.0f, 10.f, 0.01f, 1.f),
+                                                           1.0f,
+                                                           "x"));
     name = getLadderFilterModeName();
     layout.add(std::make_unique<juce::AudioParameterChoice>(
                                                             juce::ParameterID{name, versionHint},
@@ -426,7 +441,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout AudioPlugin1AudioProcessor::
                                                             juce::StringArray { "LP", "HP", "BP" },
                                                             0));
     
-    
+    /*
+    general filter: https://docs.juce.com/develop/structdsp_1_1IIR_1_1Coefficients.html
+    Mode: Peak, bandpass, notch, allpass,
+    freq: 20hz - 20,000hz in 1hz steps
+    Q: 0.1 - 10 in 0.05 steps
+    gain: -24db to +24db om 0.5db increments
+    */
     
     
     return layout;
